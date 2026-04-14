@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        Komposisjon: termometer stikker opp av bølgene.
+        Bølgene er tegnet OVER termometeret (bunn) for å gi effekten
+        av at termometeret er delvis nedsenket i vann.
+    -->
+
+    <!-- ═══════════════════ TERMOMETER ═══════════════════ -->
+
+    <!-- Ytre rør (hvitt, avrundet topp) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M47,66 L47,26 A7,7 0 0 1 61,26 L61,66 Z"/>
+
+    <!-- Ytre kule (hvitt) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,76 A14,14 0 1,0 68,76 A14,14 0 1,0 40,76 Z"/>
+
+    <!-- Indre rør – tom del (mørk blå = gjennomsiktig effekt) -->
+    <path
+        android:fillColor="#0A2D50"
+        android:pathData="M51,66 L51,28 A3,3 0 0 1 57,28 L57,66 Z"/>
+
+    <!-- Indre kule – tom (mørk blå) -->
+    <path
+        android:fillColor="#0A2D50"
+        android:pathData="M44,76 A10,10 0 1,0 64,76 A10,10 0 1,0 44,76 Z"/>
+
+    <!-- Kvikksølv/væske i røret (varm amber – ca. 65% fylt) -->
+    <path
+        android:fillColor="#FF8C42"
+        android:pathData="M51,66 L51,41 L57,41 L57,66 Z"/>
+
+    <!-- Kvikksølv i kule (amber) -->
+    <path
+        android:fillColor="#FF8C42"
+        android:pathData="M44,76 A10,10 0 1,0 64,76 A10,10 0 1,0 44,76 Z"/>
+
+    <!-- Glans på kule (hvit skinneffekt øverst i kulen) -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M47,73 A8,5 0 0 1 58,70 A8,5 0 0 0 47,73 Z"/>
+
+    <!-- Streker til høyre for røret (graderinger) -->
+    <!-- Lang strek -->
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M62,32 L69,32 L69,33.5 L62,33.5 Z"/>
+    <!-- Kort strek -->
+    <path
+        android:fillColor="#88FFFFFF"
+        android:pathData="M62,39 L66,39 L66,40.5 L62,40.5 Z"/>
+    <!-- Lang strek (ved kvikksølvnivå) -->
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M62,46 L69,46 L69,47.5 L62,47.5 Z"/>
+    <!-- Kort strek -->
+    <path
+        android:fillColor="#88FFFFFF"
+        android:pathData="M62,53 L66,53 L66,54.5 L62,54.5 Z"/>
+    <!-- Lang strek -->
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M62,60 L69,60 L69,61.5 L62,61.5 Z"/>
+
+    <!-- Glans langs venstre side av røret (glassblankt look) -->
+    <path
+        android:fillColor="#1AFFFFFF"
+        android:pathData="M49.5,28 Q49,24 51,23 L51,66 L49.5,66 Z"/>
+
+    <!-- ═══════════════════ BØLGER ═══════════════════ -->
+
+    <!-- Bølge 1 – bak (lysere blå, mer gjennomsiktig) -->
+    <path
+        android:fillColor="#664A8DC4"
+        android:pathData="M0,83 Q13.5,73 27,83 Q40.5,93 54,83 Q67.5,73 81,83 Q94.5,93 108,83 L108,108 L0,108 Z"/>
+
+    <!-- Bølge 2 – foran (lys himmelblå, mer solid) -->
+    <path
+        android:fillColor="#BBD1E9FF"
+        android:pathData="M0,90 Q13.5,80 27,90 Q40.5,100 54,90 Q67.5,80 81,90 Q94.5,100 108,90 L108,108 L0,108 Z"/>
+
+    <!-- Skum/topp på fremste bølge (hvit stripe) -->
+    <path
+        android:fillColor="#55FFFFFF"
+        android:pathData="M0,90 Q13.5,80 27,90 Q40.5,100 54,90 Q67.5,80 81,90 Q94.5,100 108,90 L108,92 Q94.5,102 81,92 Q67.5,82 54,92 Q40.5,102 27,92 Q13.5,82 0,92 Z"/>
+
+</vector>

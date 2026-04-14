@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Lillesand Badetemperaturer</string>
+    <string name="bathing_locations">Badetemperaturer</string>
+    <string name="subtitle">Lillesand Kommune</string>
+    <string name="last_updated">Oppdatert</string>
+    <string name="refresh">Oppdater</string>
+    <string name="loading">Henter temperaturer…</string>
+    <string name="error_loading">Kunne ikke hente data. Sjekk internettilkoblingen din.</string>
+    <string name="retry">Prøv igjen</string>
+    <string name="temperature_unit">°C</string>
+    <string name="map_link">Se kart over badeplasser</string>
+    <string name="degrees_celsius">%1$.1f °C</string>
+    <string name="cold_label">Kaldt</string>
+    <string name="cool_label">Friskt</string>
+    <string name="comfortable_label">Behagelig</string>
+    <string name="warm_label">Varmt</string>
+</resources>
