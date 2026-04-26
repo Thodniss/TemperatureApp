@@ -23,8 +23,8 @@ import java.util.Locale
 val OSLO_ZONE: ZoneId = ZoneId.of("Europe/Oslo")
 private val UPDATE_HOURS = listOf(2, 6, 10, 14, 18, 22)
 
-/** Lokasjoner som skal filtreres bort fra listen */
-private val EXCLUDED_LOCATIONS = setOf("traudalsbekken")
+/** Lokasjoner som skal filtreres bort fra liste og historikk */
+val EXCLUDED_LOCATIONS = setOf("traudalsbekken")
 
 /** Koordinater for kjente badeplasser i Lillesand */
 private val LOCATION_COORDS = mapOf(
@@ -47,7 +47,8 @@ sealed class UiState {
         val locations: List<BathingLocation>,
         val fetchedAt: String,
         val schedule: UpdateSchedule,
-        val sortByTemp: Boolean = false
+        val sortByTemp: Boolean = false,
+        val uvIndex: Double? = null
     ) : UiState()
     data class Error(val message: String) : UiState()
 }
@@ -67,6 +68,14 @@ class BathingViewModel(application: Application) : AndroidViewModel(application)
         val newValue = !_darkMode.value
         _darkMode.value = newValue
         settingsPrefs.edit().putBoolean("dark_mode", newValue).apply()
+    }
+
+    private val _skinType = MutableStateFlow(settingsPrefs.getInt("skin_type", 3))
+    val skinType: StateFlow<Int> = _skinType
+
+    fun setSkinType(type: Int) {
+        _skinType.value = type
+        settingsPrefs.edit().putInt("skin_type", type).apply()
     }
 
     private val _showDistance = MutableStateFlow(settingsPrefs.getBoolean("show_distance", false))
@@ -112,9 +121,14 @@ class BathingViewModel(application: Application) : AndroidViewModel(application)
                 } else {
                     val fetched = withContext(Dispatchers.IO) { repository.fetchLocations() }
                     val epochMs = now.atZone(OSLO_ZONE).toInstant().toEpochMilli()
-                    withContext(Dispatchers.IO) { cache.save(epochMs, formatTime(now), fetched) }
+                    val toSave = fetched.filter { loc -> EXCLUDED_LOCATIONS.none { loc.name.lowercase().contains(it) } }
+                    withContext(Dispatchers.IO) { cache.save(epochMs, formatTime(now), toSave) }
                     _history.value = cache.loadHistory()
                     fetched
+                }
+
+                val uvIndex = withContext(Dispatchers.IO) {
+                    try { repository.fetchUvIndex() } catch (_: Exception) { null }
                 }
 
                 rawLocations = enrichWithCoords(locations)
@@ -122,7 +136,8 @@ class BathingViewModel(application: Application) : AndroidViewModel(application)
                     locations = orderedLocations(rawLocations),
                     fetchedAt = formatTime(now),
                     schedule = computeSchedule(now),
-                    sortByTemp = isSortedByTemp
+                    sortByTemp = isSortedByTemp,
+                    uvIndex = uvIndex
                 )
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(message = e.message ?: "Ukjent feil")

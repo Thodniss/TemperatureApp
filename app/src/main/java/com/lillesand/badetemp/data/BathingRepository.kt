@@ -13,6 +13,18 @@ class BathingRepository {
         .build()
 
     private val url = "https://www.lillesand.kommune.no/Badeplasser.html"
+    private val uvUrl = "https://api.open-meteo.com/v1/forecast?latitude=58.25&longitude=8.01&current=uv_index&timezone=Europe%2FOslo"
+
+    suspend fun fetchUvIndex(): Double? {
+        return try {
+            val request = Request.Builder().url(uvUrl).build()
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) return null
+            val body = response.body?.string() ?: return null
+            val json = org.json.JSONObject(body)
+            json.getJSONObject("current").getDouble("uv_index")
+        } catch (_: Exception) { null }
+    }
 
     /**
      * Fetches bathing locations and temperatures by scraping the municipality page.

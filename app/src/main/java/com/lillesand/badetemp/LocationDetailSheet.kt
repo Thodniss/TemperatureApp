@@ -31,7 +31,7 @@ fun LocationDetailSheet(
 ) {
     val context = LocalContext.current
     val tempColor = location.temperature?.let { temperatureColor(it) } ?: LillesandBlueLight
-    val tempLabel = location.temperature?.let { temperatureLabel(it, location.name) } ?: "—"
+    val tempLabel = location.temperature?.let { temperatureLabel(it) } ?: "—"
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
