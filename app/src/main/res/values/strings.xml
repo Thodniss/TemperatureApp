@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lillesand Badetemperaturer</string>
+    <string name="app_name">Bad i Lillesand</string>
     <string name="bathing_locations">Badetemperaturer</string>
     <string name="subtitle">Lillesand Kommune</string>
     <string name="last_updated">Oppdatert</string>

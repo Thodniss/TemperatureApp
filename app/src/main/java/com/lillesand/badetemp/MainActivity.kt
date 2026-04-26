@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -74,6 +75,7 @@ fun BathingApp(vm: BathingViewModel = viewModel()) {
     val history by vm.history.collectAsStateWithLifecycle()
     val darkMode by vm.darkMode.collectAsStateWithLifecycle()
     val showDistance by vm.showDistance.collectAsStateWithLifecycle()
+    val skinType by vm.skinType.collectAsStateWithLifecycle()
     val userLocation by vm.userLocation.collectAsStateWithLifecycle()
     val isRefreshing = state is UiState.Loading
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -176,6 +178,8 @@ fun BathingApp(vm: BathingViewModel = viewModel()) {
                                 fetchedAt = currentState.fetchedAt,
                                 schedule = currentState.schedule,
                                 sortByTemp = currentState.sortByTemp,
+                                uvIndex = currentState.uvIndex,
+                                skinType = skinType,
                                 userLocation = if (showDistance) userLocation else null,
                                 onSyncOrder = vm::syncOrder,
                                 onToggleSort = vm::toggleSort
@@ -196,6 +200,8 @@ fun BathingApp(vm: BathingViewModel = viewModel()) {
                 darkMode = darkMode,
                 onToggleDarkMode = vm::toggleDarkMode,
                 showDistance = showDistance,
+                skinType = skinType,
+                onSkinTypeChange = vm::setSkinType,
                 onToggleDistance = {
                     if (!showDistance) {
                         // Skrur på: sjekk/be om tillatelse
@@ -249,7 +255,7 @@ fun BathingTopBar(onRefresh: () -> Unit, onSettings: () -> Unit) {
                     )
                 )
                 Text(
-                    text = "Lillesand Kommune",
+                    text = "Lillesand",
                     color = Color.White.copy(alpha = 0.85f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal
@@ -313,6 +319,8 @@ fun SuccessScreen(
     fetchedAt: String,
     schedule: UpdateSchedule,
     sortByTemp: Boolean,
+    uvIndex: Double?,
+    skinType: Int,
     userLocation: Pair<Double, Double>?,
     onSyncOrder: (List<String>) -> Unit,
     onToggleSort: () -> Unit
@@ -366,6 +374,8 @@ fun SuccessScreen(
                 fetchedAt = fetchedAt,
                 schedule = schedule,
                 averageTemp = avgTemp,
+                uvIndex = uvIndex,
+                skinType = skinType,
                 sortByTemp = sortByTemp,
                 onToggleSort = onToggleSort
             )
@@ -411,6 +421,8 @@ fun HeroHeader(
     fetchedAt: String,
     schedule: UpdateSchedule,
     averageTemp: Double?,
+    uvIndex: Double?,
+    skinType: Int,
     sortByTemp: Boolean,
     onToggleSort: () -> Unit
 ) {
@@ -443,7 +455,7 @@ fun HeroHeader(
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
-                Text(text = "Badetemperaturer", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text(text = "Badetemperaturerer i Lillesand", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -468,6 +480,10 @@ fun HeroHeader(
                             }
                         }
                     }
+                }
+                if (uvIndex != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    UvRow(uvIndex = uvIndex, skinType = skinType)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 HorizontalDivider(color = Color.White.copy(alpha = 0.25f))
@@ -549,7 +565,7 @@ fun BathingLocationCard(
     onClick: () -> Unit = {}
 ) {
     val tempColor = location.temperature?.let { temperatureColor(it) } ?: LillesandBlueLight
-    val tempLabel = location.temperature?.let { temperatureLabel(it, location.name) } ?: "—"
+    val tempLabel = location.temperature?.let { temperatureLabel(it) } ?: "—"
     val elevation = if (isDragging) 10.dp else 2.dp
 
     Card(
@@ -682,15 +698,88 @@ private fun formatDistance(meters: Double): String = when {
     else -> "%.1f km".format(meters / 1000)
 }
 
-/** Picks a consistent phrase per location name so the same spot always gets the same phrase. */
-fun temperatureLabel(temp: Double, locationName: String): String {
+@Composable
+private fun UvRow(uvIndex: Double, skinType: Int) {
+    val color = uvIndicatorColor(uvIndex)
+    val level = uvLevelLabel(uvIndex)
+    val sunscreen = uvSunscreen(uvIndex, skinType)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(Icons.Outlined.WbSunny, contentDescription = null, tint = color, modifier = Modifier.size(15.dp))
+        Text(
+            text = "UV %.1f – %s".format(uvIndex, level),
+            color = color,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(4.dp))
+                .background(color.copy(alpha = 0.22f))
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Text(text = sunscreen, color = Color.White, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium)
+        }
+    }
+}
+
+private fun uvIndicatorColor(uv: Double): Color = when {
+    uv < 3.0  -> Color(0xFF66BB6A)
+    uv < 6.0  -> Color(0xFFFFCA28)
+    uv < 8.0  -> Color(0xFFFFA726)
+    uv < 11.0 -> Color(0xFFEF5350)
+    else      -> Color(0xFFAB47BC)
+}
+
+private fun uvLevelLabel(uv: Double): String = when {
+    uv < 3.0  -> "Lav"
+    uv < 6.0  -> "Moderat"
+    uv < 8.0  -> "Høy"
+    uv < 11.0 -> "Svært høy"
+    else      -> "Ekstrem"
+}
+
+private fun uvSunscreen(uv: Double, skinType: Int): String = when (skinType) {
+    1 -> when {                   // Svært lys – brenner alltid
+        uv < 2.0  -> "SPF 30+"
+        else      -> "SPF 50+"
+    }
+    2 -> when {                   // Lys – brenner lett
+        uv < 3.0  -> "SPF 15+"
+        uv < 6.0  -> "SPF 30+"
+        else      -> "SPF 50+"
+    }
+    3 -> when {                   // Middels – brenner av og til (standard)
+        uv < 3.0  -> "Ingen solkrem"
+        uv < 6.0  -> "SPF 15+"
+        uv < 8.0  -> "SPF 30+"
+        uv < 11.0 -> "SPF 50+"
+        else      -> "SPF 50+ og hodeplagg"
+    }
+    4 -> when {                   // Mørk – brenner sjelden
+        uv < 5.0  -> "Ingen solkrem"
+        uv < 8.0  -> "SPF 15+"
+        uv < 11.0 -> "SPF 30+"
+        else      -> "SPF 50+"
+    }
+    5 -> when {                   // Svært mørk – brenner svært sjelden
+        uv < 8.0  -> "Ingen solkrem"
+        uv < 11.0 -> "SPF 15+"
+        else      -> "SPF 30+"
+    }
+    else -> uvSunscreen(uv, 3)
+}
+
+fun temperatureLabel(temp: Double): String {
     val phrases = when {
         temp < 8.0 -> listOf(
             "Jysla kaldt!",
             "Sabla kaldt!",
             "Spiggent!",
             "Fryser a meg te-ane!",
-            "Jæklig kaldt – ikkje for pyser!",
+            "Himla kaldt – ikkje for pyser!",
             "Grusomt kaldt dette!",
             "Ikkje for alle!"
         )
@@ -700,8 +789,8 @@ fun temperatureLabel(temp: Double, locationName: String): String {
             "Ikkje heilt smeig",
             "Litt spiggent, men duganes",
             "Kaldt, men ikkje spiggent",
-            "Treng litt mot!",
-            "Sprek-bading dette!"
+            "Trenger litt mod!",
+            "Spreg bading dette!"
         )
         temp < 18.0 -> listOf(
             "Bedre med ei bryggesleng!",
@@ -731,6 +820,5 @@ fun temperatureLabel(temp: Double, locationName: String): String {
             "E smeltår nesten!"
         )
     }
-    val index = Math.abs(locationName.hashCode()) % phrases.size
-    return phrases[index]
+    return phrases.random()
 }

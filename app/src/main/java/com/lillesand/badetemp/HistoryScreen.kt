@@ -138,7 +138,9 @@ fun HistorySnapshotCard(snap: TemperatureSnapshot) {
                 verticalArrangement = Arrangement.spacedBy(5.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                snap.locations.forEach { loc ->
+                snap.locations
+                    .filter { loc -> EXCLUDED_LOCATIONS.none { loc.name.lowercase().contains(it) } }
+                    .forEach { loc ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,

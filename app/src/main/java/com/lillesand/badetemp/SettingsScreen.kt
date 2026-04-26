@@ -1,17 +1,35 @@
 package com.lillesand.badetemp
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lillesand.badetemp.ui.theme.LillesandBlue
+
+private val SKIN_TONES = listOf(
+    Color(0xFFF5D5B8),
+    Color(0xFFDBA882),
+    Color(0xFFC47E4B),
+    Color(0xFF8D5524),
+    Color(0xFF3E2007)
+)
+
+private val SKIN_LABELS = listOf("Svært lys", "Lys", "Middels", "Mørk", "Svært mørk")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,6 +38,8 @@ fun SettingsBottomSheet(
     onToggleDarkMode: () -> Unit,
     showDistance: Boolean,
     onToggleDistance: () -> Unit,
+    skinType: Int,
+    onSkinTypeChange: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
@@ -101,6 +121,85 @@ fun SettingsBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Sol og hudtype
+            Text(
+                text = "SOL OG HUDTYPE",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.WbSunny,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Hudtype",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Tilpasser solkrem-anbefaling",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        SKIN_TONES.forEachIndexed { index, toneColor ->
+                            val typeNum = index + 1
+                            val selected = skinType == typeNum
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(toneColor)
+                                        .then(
+                                            if (selected)
+                                                Modifier.border(3.dp, LillesandBlue, CircleShape)
+                                            else
+                                                Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
+                                        )
+                                        .clickable { onSkinTypeChange(typeNum) }
+                                )
+                                Text(
+                                    text = SKIN_LABELS[index],
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (selected) LillesandBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.width(54.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // Om appen
             Text(
                 text = "OM APPEN",
@@ -126,7 +225,7 @@ fun SettingsBottomSheet(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Lillesand Badetemperaturer",
+                            text = "Bad i Lillesand",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface

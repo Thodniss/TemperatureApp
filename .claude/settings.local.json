@@ -3,7 +3,9 @@
     "allow": [
       "WebFetch(domain:www.lillesand.kommune.no)",
       "Bash(./gradlew assembleDebug)",
-      "Bash(bash gradlew:*)"
+      "Bash(bash gradlew:*)",
+      "Bash(xargs grep *)",
+      "PowerShell(Copy-Item *)"
     ]
   }
 }
